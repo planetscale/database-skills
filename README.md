@@ -14,6 +14,10 @@ see [skills.sh](https://skills.sh) for more info.
 
 ## Available Skills
 
+### clickhouse
+
+Plan and review ClickHouse schema, table engines, indexing, query tuning, materialized views, and operations. Use when creating or modifying ClickHouse tables or queries; diagnosing slow queries; planning data ingestion pipelines; or working with replication, partitioning, and TTL policies.
+
 ### mysql
 
 Plan and review MySQL/InnoDB schema, indexing, query tuning, transactions, and operations. Use when creating or modifying MySQL tables, indexes, or queries; diagnosing slow or locking behavior; planning migrations; or troubleshooting replication and connection issues.
@@ -36,6 +40,9 @@ Vitess best practices, query optimization, and connection troubleshooting for Pl
 database-skills/
 ├── README.md
 └── skills/
+    ├── clickhouse/
+    │   ├── SKILL.md
+    │   └── references/
     ├── mysql/
     │   ├── SKILL.md
     │   └── references/
