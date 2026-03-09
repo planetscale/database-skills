@@ -36,6 +36,10 @@ Overview and guidance for Neki, PlanetScale's sharded Postgres product. Use when
 
 PostgreSQL best practices, query optimization, connection troubleshooting, and performance insights for PlanetScale Postgres. Use when working with PlanetScale PostgreSQL databases — schema design, indexing, MVCC/VACUUM, WAL tuning, replication, monitoring, or PlanetScale-specific features like connection pooling and CLI insights.
 
+### sqlite
+
+SQLite best practices for schema design, indexing, query planning, WAL/checkpoint tuning, transactions, and safe migrations. Use when building or debugging embedded/mobile/edge SQLite workloads and local application databases.
+
 ### vitess
 
 Vitess best practices, query optimization, and connection troubleshooting for PlanetScale Vitess databases. Use when working with sharding, VSchema configuration, keyspace management, online DDL, VReplication, or MySQL-compatible scaling issues.
@@ -55,6 +59,9 @@ database-skills/
     │   ├── SKILL.md
     │   └── references/
     ├── postgres/
+    │   ├── SKILL.md
+    │   └── references/
+    ├── sqlite/
     │   ├── SKILL.md
     │   └── references/
     └── vitess/

@@ -2,7 +2,7 @@
   "name": "database-skills",
   "displayName": "PlanetScale Database Skills",
   "version": "1.0.0",
-  "description": "Database-focused skills for MySQL, Postgres, Vitess, and Neki workflows.",
+  "description": "Database-focused skills for MySQL, Postgres, SQLite, Vitess, and Neki workflows.",
   "author": {
     "name": "PlanetScale"
   },
@@ -14,6 +14,7 @@
     "database",
     "mysql",
     "postgres",
+    "sqlite",
     "vitess",
     "neki",
     "planetscale"
