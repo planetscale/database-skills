@@ -1,1 +1,3 @@
 .cursor-plugin/
+node_modules/
+.wrangler/

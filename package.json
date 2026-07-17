@@ -1,0 +1,7 @@
+{
+  "name": "database-skills",
+  "private": true,
+  "devDependencies": {
+    "wrangler": "^4.111.0"
+  }
+}
