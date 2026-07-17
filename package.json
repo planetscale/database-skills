@@ -1,5 +1,5 @@
 {
-  "name": "database-skills-website",
+  "name": "database-skills",
   "private": true,
   "scripts": {
     "deploy": "wrangler deploy"
