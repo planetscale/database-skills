@@ -23,7 +23,7 @@ Neki is a **sharded Postgres** product built by [PlanetScale](https://planetscal
 
 For the latest updates and to subscribe for announcements, visit the official Neki page:
 
-- [https://www.neki.dev/](https://www.neki.dev/)
+- [https://neki.dev/](https://neki.dev/)
 
 ## Resources
 
