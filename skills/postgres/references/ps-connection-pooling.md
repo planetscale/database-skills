@@ -46,6 +46,14 @@ PlanetScale PgBouncer uses **transaction pooling mode**. These features are unav
 - Session-level advisory locks
 - `SET` commands persisting beyond a transaction
 
+## Session State Is Not Yours — Do Not `SET` on Port 6432
+
+PgBouncer reuses server connections across clients. A session-level `SET` survives your transaction and **leaks into the next client's session** on that connection.
+
+The classic poisoning case: maintenance sets `default_transaction_read_only = on` on `6432`. The pooler returns that backend to the pool. The next unrelated application connection inherits a **read-only** database, and writes start failing with no config change to explain it.
+
+**Rule:** Never run session-level `SET`, `SET SESSION`, or `SET default_transaction_read_only` on port `6432`. For anything that changes session state — read-only mode, `search_path`, `statement_timeout` — connect on `5432` directly. If a pooled query genuinely needs a setting, scope it with `SET LOCAL` inside the transaction so it dies with the transaction.
+
 ## Recommended Patterns
 
 - Size pools from observed concurrency, query memory behavior, and connection limits.
@@ -55,6 +63,7 @@ PlanetScale PgBouncer uses **transaction pooling mode**. These features are unav
 
 - Avoid setting pool size with only `CPU_cores * N` while ignoring query-memory amplification.
 - Avoid running session-dependent workflows through transaction pooling.
+- Never run session-level `SET` (especially `default_transaction_read_only`) on `6432` — the setting leaks to the next pooled client. Use port `5432` for maintenance, or `SET LOCAL` scoped to one transaction.
 
 ## Connecting
 
