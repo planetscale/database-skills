@@ -34,4 +34,5 @@ Use port **5432** for DDL, admin tasks, and migrations.
 **Best practices:**
 - Use the PlanetScale Postgres metrics page to monitor direct and PgBouncer connections
 - Route OLTP traffic to port 6432 and reserve 5432 for admin/migrations.
+- Run maintenance that changes session state (e.g. `SET default_transaction_read_only`) on port 5432 only. On 6432 (PgBouncer transaction pooling) session `SET`s leak into other clients' connections.
 - Avoid raising `max_connections` reactively instead of pooling.
