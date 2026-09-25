@@ -30,7 +30,7 @@ Plan and review MySQL/InnoDB schema, indexing, query tuning, transactions, and o
 
 ### neki
 
-Overview and guidance for Neki, PlanetScale's sharded Postgres product. Use when working with Neki-related tasks or evaluating how to scale and shard Postgres.
+Guidance for Neki, PlanetScale's distributed (sharded) Postgres. Use when working with a Neki database — connecting, data topology and shard keys, query routing and fanout, cross-shard transactions, schema changes, resharding and migration, NK013 errors — or when scaling and sharding Postgres.
 
 ### postgres
 
