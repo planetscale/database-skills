@@ -47,18 +47,19 @@ WHERE installed_version IS NOT NULL ORDER BY name;
 
 ### pgvector on sharded tables
 
-Neki may not implement every function, cast, or cross-shard shape Postgres accepts. Use the working forms:
+These shapes work on a sharded table:
 
-- Project the distance once and order by the alias (works across shards):
+- `ORDER BY` the distance expression, or project it once and order by the alias:
   ```sql
   SELECT tenant_id, item_id, embedding <-> '[1,0,0]'::vector AS distance
   FROM public.vector_items ORDER BY distance LIMIT 20;
   ```
-- Repeating the distance expression in `ORDER BY` is rejected on sharded Neki (`NK013`, `vector_recv` not implemented).
-- Declare a prepared vector parameter as `text` and cast with `$1::vector`; use vector literals (`'[1,0,0]'::vector`), not `ARRAY[...]::vector`.
-- Global `avg(vector)` / `sum(vector)` fail on sharded tables; tenant-scoped and direct-shard aggregates work.
-- Routed `INSERT ... SELECT` of vector values can hit the same limit — insert literals or keep the load on one shard.
-- Raise `ivfflat.probes` or `hnsw.ef_search` for better recall.
+- Vector literals (`'[1,0,0]'::vector`) and `ARRAY[1,0,0]::vector`.
+- `avg(embedding)` and `sum(embedding)` across shards. The router scatters and combines the aggregate.
+- `INSERT ... SELECT` of vector values, including a statement that reads more than one shard.
+- A prepared parameter declared as `vector`.
+
+`l2_norm(embedding)` is ambiguous (`42725`) even when the column type is `vector`. Raise `ivfflat.probes` or `hnsw.ef_search` for better recall. Neki may not implement every function, cast, or cross-shard shape Postgres accepts. If a shape is rejected, the error carries an `NK013` code.
 
 ## Preview and cleanup notes
 
