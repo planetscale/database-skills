@@ -49,7 +49,7 @@ WHERE installed_version IS NOT NULL ORDER BY name;
 
 These shapes work on a sharded table:
 
-- `ORDER BY` the distance expression, or project it once and order by the alias:
+- `ORDER BY` the distance expression, or project it once and order by the alias. The same is true for cosine (`<=>`), inner product (`<#>`), and L1 (`<+>`) on `vector`, `halfvec`, and `sparsevec`, and for Hamming (`<~>`) and Jaccard (`<%>`) on `bit`:
   ```sql
   SELECT tenant_id, item_id, embedding <-> '[1,0,0]'::vector AS distance
   FROM public.vector_items ORDER BY distance LIMIT 20;
