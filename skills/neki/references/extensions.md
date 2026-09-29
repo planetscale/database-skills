@@ -54,7 +54,7 @@ These shapes work on a sharded table:
   SELECT tenant_id, item_id, embedding <-> '[1,0,0]'::vector AS distance
   FROM public.vector_items ORDER BY distance LIMIT 20;
   ```
-- Vector literals (`'[1,0,0]'::vector`) and `ARRAY[1,0,0]::vector`.
+- Vector literals (`'[1,0,0]'::vector`) and `ARRAY[1,0,0]::vector`. Cast the literal when the distance is in the select list: an uncast `embedding <-> '[1,0,0]'` there fails with `operator does not exist: vector <-> text` for every distance operator, while the uncast form resolves in `ORDER BY` and `WHERE`.
 - `avg(embedding)` and `sum(embedding)` across shards. The router scatters and combines the aggregate.
 - `INSERT ... SELECT` of vector values, including a statement that reads more than one shard.
 - A prepared parameter declared as `vector`.
