@@ -65,7 +65,7 @@ ALTER TABLE orders ADD CONSTRAINT uq_order_number UNIQUE (tenant_id, order_numbe
 
 ## Unsupported objects during Platform Preview
 
-The router rejects objects tied to one host's storage or code: tablespaces, large objects, procedural languages with custom handlers, `LOAD`, user-defined text search configurations and dictionaries, and temporary tables, views, and sequences. See [error-codes.md](https://raw.githubusercontent.com/planetscale/database-skills/main/skills/neki/references/error-codes.md).
+The router rejects objects tied to one host's storage or code: tablespaces, large objects, procedural languages with custom handlers, `LOAD`, user-defined text search configurations and dictionaries, and temporary tables, temporary views, and temporary sequences (`NK013` code `338`). Ordinary views and sequences are allowed. See [error-codes.md](https://raw.githubusercontent.com/planetscale/database-skills/main/skills/neki/references/error-codes.md).
 
 ## General guidelines
 

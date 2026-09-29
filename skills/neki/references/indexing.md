@@ -38,7 +38,7 @@ A **reference table** keeps a full copy of shared data on every shard in a group
 
 - Neki assumes the copies already exist and match — it does **not** verify them, so populate every copy before binding.
 - A write to a reference table runs on **every** shard holding a copy (one write → N shard executions), and those per-shard commits are independent.
-- `COPY TO` and file `COPY` are unavailable for reference tables.
+- Client `COPY TO STDOUT` works for a reference table, including text, CSV, and binary. File `COPY` does not (`NK013` code `43`).
 
 ## Global secondary indexes (GSIs)
 

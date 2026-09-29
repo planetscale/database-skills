@@ -57,7 +57,7 @@ Replica selection is tuned by `__neki.replica_recency` (`prefer`/`require`/`off`
 
 ## Targeting one shard directly
 
-`SET __neki.shard = 'shard-a';` forwards data statements (`SELECT`, `INSERT`, `UPDATE`, `DELETE`, `MERGE`) to that shard UID without topology routing. Schema-changing DDL, `COPY`, `DO`, and data queries that also call router-managed functions (`nextval`, `current_setting`, `set_config`) are rejected while it is set. `RESET __neki.shard;` restores routing. Use it for debugging one shard, not for application writes.
+`SET __neki.shard = 'shard-a';` forwards data statements (`SELECT`, `INSERT`, `UPDATE`, `DELETE`, `MERGE`) to that shard UID without topology routing. Schema-changing DDL, `COPY`, `DO`, and data queries that also call router-managed functions (`nextval`, `current_setting`, `set_config`) are rejected while it is set. `VACUUM`, `ANALYZE`, and `VACUUM FULL` still run on every shard. `RESET __neki.shard;` restores routing. Use it for debugging one shard, not for application writes.
 
 All `__neki.*` routing settings (`target`, `shard`, `fanout`, `tx_mode`, and the replica policies) cannot change inside a transaction — set them before `BEGIN`. A misspelled name (for example `__neki.transaction_mode`) is accepted silently as an ordinary custom parameter and has no effect, so confirm a setting took hold with `SHOW __neki.tx_mode;`.
 
@@ -65,7 +65,7 @@ All `__neki.*` routing settings (`target`, `shard`, `fanout`, `tx_mode`, and the
 
 Multi-shard plans dispatch in parallel and combine results (partial aggregates, cross-shard ordering and limits, joins that can't run on one shard). A query without `ORDER BY` has **no** cross-shard order guarantee — add explicit ordering when it matters. As a shard group grows, scatter queries touch more shards; avoid scatter in hot paths.
 
-`COPY FROM STDIN` into a sharded table works when the input includes the shard-key column; it is rejected for a table with an enabled GSI (COPY doesn't maintain lookup rows). Other `COPY` limits: file-based `COPY` works for unsharded tables only; `COPY TO PROGRAM`, `COPY FROM PROGRAM`, `COPY (SELECT ...) TO`, and `COPY FROM ... WHERE` are rejected; `COPY` must use the simple query protocol and be the only statement in the query. If a `COPY` shape is rejected, the error carries an `NK013` catalog code (see [error-codes.md](https://raw.githubusercontent.com/planetscale/database-skills/main/skills/neki/references/error-codes.md)).
+`COPY FROM STDIN` into a sharded table works when the input includes the shard-key column; it is rejected for a table with an enabled GSI (COPY doesn't maintain lookup rows). Client `COPY TO STDOUT` works for a sharded table, in text, CSV, and binary. File-based `COPY` works for unsharded tables only. `COPY TO PROGRAM`, `COPY FROM PROGRAM`, `COPY (SELECT ...) TO`, and `COPY FROM ... WHERE` are rejected. `COPY` must use the simple query protocol and be the only statement in the query. If a `COPY` shape is rejected, the error carries an `NK013` catalog code (see [error-codes.md](https://raw.githubusercontent.com/planetscale/database-skills/main/skills/neki/references/error-codes.md)).
 
 ## DDL and transactions (brief)
 

@@ -16,7 +16,7 @@ Every `UPDATE` creates a new tuple version and marks the old one dead; `DELETE` 
 
 ## VACUUM vs VACUUM FULL
 
-`VACUUM` is non-blocking (`SHARE UPDATE EXCLUSIVE`) and marks dead space reusable. `VACUUM FULL` rewrites the table under `ACCESS EXCLUSIVE` — a last resort. `VACUUM` and `ANALYZE` sent through a router run on every shard. `pg_repack` is not in Neki's extension catalog. Prevent bloat with autovacuum tuning and short transactions; if a table is badly bloated, schedule `VACUUM FULL` for a quiet window (it blocks the table) or contact PlanetScale Support.
+`VACUUM` is non-blocking (`SHARE UPDATE EXCLUSIVE`) and marks dead space reusable. `VACUUM FULL` rewrites the table under `ACCESS EXCLUSIVE` — a last resort. `VACUUM`, `ANALYZE`, and `VACUUM FULL` sent through a router run on every shard, including when `__neki.shard` is set. A shard pin limits data statements; it does not limit these maintenance commands. `VACUUM FULL` takes its exclusive lock on every shard. `pg_repack` is not in Neki's extension catalog. Prevent bloat with autovacuum tuning and short transactions; if a table is badly bloated, schedule `VACUUM FULL` for a quiet window or contact PlanetScale Support.
 
 ## Autovacuum tuning (configuration-profile parameters)
 

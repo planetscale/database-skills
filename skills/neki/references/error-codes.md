@@ -26,12 +26,12 @@ The bracketed number is a **stable catalog code**: it identifies one specific ga
 | Area | Examples |
 | --- | --- |
 | Statements, transactions, sessions | `1` `SELECT ... INTO` (use `CREATE TABLE AS`); `21` inheritance parent without `ONLY`; `22` `AND CHAIN`; `23`–`25` unsupported transaction command, isolation level, or option (for example `PREPARE TRANSACTION`); `26` atomic transaction mode; `27`–`29` unsupported `SET` variants, `SET FROM CURRENT`, `SET TRANSACTION SNAPSHOT`; `30`–`33` unsupported `EXPLAIN (NEKI_PLAN)` shapes, options, formats |
-| Topology and evaluation context | `2` replication from a replica; `10` multi-column partitioning indexes; `40`–`56` `COPY` limits (for example file `COPY` and `COPY TO PROGRAM`, `COPY` from a query, `COPY FROM` into a table with an active GSI, `COPY` in the extended protocol or a multi-statement query) |
+| Topology and evaluation context | `2` replication from a replica; `10` a `columns` list with more than one entry, rejected when the topology is applied, and an expression over more than one column, which is stored and then rejected on `INSERT`; `115` a predicate on more than one base column of that expression; client `COPY TO STDOUT` works for sharded tables, reference tables, and materialized views, including binary (codes `40`, `42`, and `56` are retired); `41` and `43` file `COPY`; `44`–`55` other `COPY` limits (for example `COPY TO PROGRAM`, `COPY` from a query, `COPY FROM` into a table with an active GSI, `COPY` in the extended protocol or a multi-statement query) |
 | Advisory locks | `60` session advisory locks on multiple shards; `61` mixing session and transaction advisory locks; `62`, `139` unavailable evaluation context or plan position |
 | PL/pgSQL (router-side execution) | `80`–`95` unsupported targets, statements, and `RAISE`/`RETURN` forms |
 | Query shapes and routing | `63` join types; `100`–`153` subquery, CTE, window-function, `INSERT ... SELECT`, `ON CONFLICT`, `MERGE`, view, set-operation, and GSI routing shapes; `138` `FETCH FIRST ... WITH TIES` across shards; `145` updating an index column |
 | Evaluation engine | `200`–`216` built-in functions, type input functions, casts, and user-defined functions, operators, and aggregates the router can't evaluate |
-| DDL | `300`–`338` operator classes and families, custom text search, event triggers, rules, large objects, custom languages, tablespaces, access methods, collations, foreign data wrappers and tables, `LOAD`, `ALTER DOMAIN`, column storage and compression, temporary tables, views, and sequences |
+| DDL | `300`–`338` operator classes and families, custom text search, event triggers, rules, large objects, custom languages, tablespaces, access methods, collations, foreign data wrappers and tables, `LOAD`, `ALTER DOMAIN`, column storage and compression; `338` is temporary tables, temporary views, and temporary sequences only — ordinary views and sequences are allowed |
 
 ## What to do
 

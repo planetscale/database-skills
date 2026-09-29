@@ -14,7 +14,7 @@ Common extensions that are **not** in the catalog, and what to use instead:
 
 | Not available | Use instead |
 | --- | --- |
-| `pg_repack` | Tune autovacuum per table and keep transactions short; `REINDEX INDEX CONCURRENTLY` for bloated indexes; `VACUUM FULL` only in a quiet window (it blocks the table) |
+| `pg_repack` | Tune autovacuum per table and keep transactions short; `REINDEX INDEX CONCURRENTLY` for bloated indexes; `VACUUM FULL` only in a quiet window (it rewrites the table on every shard, even when `__neki.shard` is set, and blocks access to it) |
 | `pg_partman` | Create and drop partitions with scheduled DDL |
 | `pgstattuple` | Compare table and index sizes (`pg_relation_size`) and dead-tuple counts (`pg_stat_user_tables`) per shard |
 | `pg_stat_statements` | Query Insights (backed by the always-enabled `pginsights`) |
