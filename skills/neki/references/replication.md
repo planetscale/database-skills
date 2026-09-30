@@ -43,4 +43,4 @@ Add replicas per configuration profile on the Clusters page (applies to every sh
 
 ## Logical replication and CDC
 
-Each shard has its own WAL, so CDC is one stream per shard. Replication from a replica is unavailable (error code 2). A shard added later receives existing publications with the rest of the schema. Subscription DDL applies to the shards that exist when it runs and is not restored when a shard is added or rebuilt. Contact PlanetScale Support before combining logical replication with shard lifecycle changes.
+Each shard has its own WAL, so CDC is one stream per shard. Replication from a replica is unavailable (error code 2). A shard added later receives existing publications with the rest of the schema. Subscriptions are not part of that schema, so a shard added later does not receive them. Contact PlanetScale Support before combining logical replication with shard lifecycle changes.
