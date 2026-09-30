@@ -19,31 +19,9 @@ Pick a shard key from the queries and transactions you rely on. Prefer a key tha
 - Keeps rows that are joined or updated together in the same shard group.
 - Stays stable for a row's lifetime (changing it relocates the row — a resharding operation).
 
-A tenant key (`tenant_id`, `org_id`, `account_id`, `customer_id`) commonly keeps a tenant's rows together. The `xxhash` shard index accepts `text`, `varchar`, `bytea`, integer, float, `numeric`, date/time, and `uuid` columns (not `json`, `jsonb`, or arrays).
+A tenant key (`tenant_id`, `org_id`, `account_id`, `customer_id`) commonly keeps a tenant's rows together. Which types a shard index accepts is in [sharding-model.md](https://raw.githubusercontent.com/planetscale/database-skills/main/skills/neki/references/sharding-model.md).
 
-## Primary keys and IDs
-
-- A single-column primary key is fine when it is the shard key. For child tables, lead a composite primary key with the shard key so lookups stay shard-local.
-- For globally unique surrogate keys on sharded tables use `uuidv7()` or application-generated IDs. See [id-generation.md](https://raw.githubusercontent.com/planetscale/database-skills/main/skills/neki/references/id-generation.md).
-
-## Co-location, uniqueness, foreign keys
-
-- **Co-locate** frequently joined tables by binding them to the same shard group and routing them through the same shard index; include the shard key in join predicates.
-- **Uniqueness**: scope unique constraints to include the shard key so they hold globally; a plain `UNIQUE(email)` only holds within a shard.
-- **Foreign keys**: keep FK-related tables in the same shard group so references stay shard-local; cross-shard references need application-level enforcement.
-- Use the same shard-key column type across co-located tables.
-
-## Access paths the shard key can't serve
-
-- **Reference tables** duplicate small shared data on every shard in a group so joins stay local.
-- **GSIs** map another key to the owner row's shard key via a lookup table (best for selective lookups).
-
-Both add write cost and must be populated and verified before use. See [indexing.md](https://raw.githubusercontent.com/planetscale/database-skills/main/skills/neki/references/indexing.md).
-
-## Transactions and scatter
-
-- Keep transactions on one shard-key value; cross-shard transactions have no shared snapshot or atomic commit (see [transactions.md](https://raw.githubusercontent.com/planetscale/database-skills/main/skills/neki/references/transactions.md)).
-- Watch for scatter queries with `EXPLAIN (NEKI_PLAN)` and Query Insights; add a routing predicate or revisit the topology.
+Keys, uniqueness, and foreign keys are in [schema-design.md](https://raw.githubusercontent.com/planetscale/database-skills/main/skills/neki/references/schema-design.md). Globally unique IDs are in [id-generation.md](https://raw.githubusercontent.com/planetscale/database-skills/main/skills/neki/references/id-generation.md). Reference tables and GSIs are in [indexing.md](https://raw.githubusercontent.com/planetscale/database-skills/main/skills/neki/references/indexing.md). Single-shard transactions are in [transactions.md](https://raw.githubusercontent.com/planetscale/database-skills/main/skills/neki/references/transactions.md).
 
 ## Readiness checklist
 

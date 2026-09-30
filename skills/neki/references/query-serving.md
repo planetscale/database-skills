@@ -53,7 +53,7 @@ Reads default to the shard **primary**. Change with `__neki.target`:
 SET __neki.target = 'replica';   -- 'primary' (the only target that accepts DML), 'replica', or 'rdonly'
 ```
 
-Replica selection is tuned by `__neki.replica_recency` (`prefer`/`require`/`off`; prefers ≤30s lag), `__neki.replica_locality` (`prefer`/`require`/`off`; the router's availability zone), and `__neki.replica_affinity` (`session`/`none`). Replicas above the maximum lag (default 15 minutes) or with unknown lag are excluded; the query fails if no candidate remains.
+How the router picks a replica, and the lag limits, are in [replication.md](https://raw.githubusercontent.com/planetscale/database-skills/main/skills/neki/references/replication.md).
 
 ## Targeting one shard directly
 
