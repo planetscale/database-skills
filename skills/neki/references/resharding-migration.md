@@ -61,7 +61,7 @@ A staged switch moves non-primary reads (`replica`/`rdonly`) first, then writes.
 
 ## Completing and source cleanup
 
-`workflow_complete` retires migration resources; source data is retained by default. `{"drop_source_data": true}` truncates tables that kept their identity and drops tables the workflow retired under a different identity. `{"rename_source_data": true}` renames those retired tables to `_<table>_old` instead, and cannot be combined with `drop_source_data`. Reshard keeps table names, so it truncates rather than renames. An old source shard can be removed later if it holds no other data and isn't the authoritative group.
+`workflow_complete` retires migration resources; source data is retained by default. `{"drop_source_data": true}` truncates tables that kept the same database, schema, and name, and drops old source tables that moved to a different one. For MoveTables you can instead rename an old source table to `_<table>_old`; you cannot both rename and remove. Reshard keeps table identifiers, so it truncates rather than renames. An old source shard can be removed later if it holds no other data and isn't the authoritative group.
 
 ## Importing external Postgres
 

@@ -24,7 +24,7 @@ WAL archiving underpins PITR; archive failures block WAL recycling and can fill 
 
 ## Logical replication and CDC
 
-Each shard has its own WAL and logical replication path, so CDC is consumed as per-shard streams and replicating a whole sharded database means one stream per shard. Replication from a replica is unavailable (error code 2). Customer publications are part of schema replay, so a shard that joins later receives them along with the rest of the schema. Contact PlanetScale Support before combining logical replication with shard lifecycle changes.
+Each shard has its own WAL and logical replication path, so CDC is consumed as per-shard streams and replicating a whole sharded database means one stream per shard. Replication from a replica is unavailable (error code 2). A shard added later receives existing publications with the rest of the schema. Subscription DDL applies to the shards that exist when it runs and is not restored when a shard is added or rebuilt. Contact PlanetScale Support before combining logical replication with shard lifecycle changes.
 
 ## Guidance
 
