@@ -48,7 +48,7 @@ Replica connections are **read-only** — writes fail rather than falling back t
 
 ## Pooling and session behavior
 
-Connection pooling is handled by the **sidecars**, configured per configuration profile (`pool-capacity`, `pool-min-conns`, `pool-max-lifetime`, `pool-max-wait-time`, `pool-idle-timeout`, `tx-idle-timeout`, `external-conn-reservation`). Routers also enforce `idle-session-timeout` (default 30 minutes) and `idle-in-transaction-session-timeout` (default 5 minutes). Prefer scaling application connections to routers over raising Postgres `max_connections`. See [process-architecture.md](https://raw.githubusercontent.com/planetscale/database-skills/main/skills/neki/references/process-architecture.md).
+Connection pooling is handled by the **sidecars**, configured per configuration profile (`pool-capacity`, `pool-min-conns`, `pool-max-lifetime`, `pool-max-wait-time`, `pool-idle-timeout`, `tx-idle-timeout`, `external-conn-reservation`). Routers also enforce `idle-session-timeout` (default 30 minutes) and `idle-in-transaction-session-timeout` (default 5 minutes). Prefer scaling application connections to routers over raising Postgres `max_connections`.
 
 ## Application guidance
 

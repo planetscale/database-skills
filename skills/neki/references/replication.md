@@ -40,3 +40,7 @@ WAL can be durable on a replica before the replica has **replayed** it, so a suc
 ## Managing replicas
 
 Add replicas per configuration profile on the Clusters page (applies to every shard on that profile). Each new replica is restored from the shard's last backup, then joined to the primary. Monitor lag on the dashboard and the Metrics Shards tab (`0s` = caught up); investigate high or unknown lag via replica CPU, IOPS, and connections alongside WAL activity. See [monitoring.md](https://raw.githubusercontent.com/planetscale/database-skills/main/skills/neki/references/monitoring.md).
+
+## Logical replication and CDC
+
+Each shard has its own WAL, so CDC is one stream per shard. Replication from a replica is unavailable (error code 2). A shard added later receives existing publications with the rest of the schema. Subscription DDL applies to the shards that exist when it runs and is not restored when a shard is added or rebuilt. Contact PlanetScale Support before combining logical replication with shard lifecycle changes.

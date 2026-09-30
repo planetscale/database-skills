@@ -41,4 +41,4 @@ Interpret metrics against each branch's **baseline** — there's no single healt
 
 ## Per-shard Postgres views
 
-Standard Postgres views (`pg_stat_activity`, `pg_stat_user_tables`, `pg_stat_user_indexes`) work on a given shard (`SET __neki.shard = '<shard_uid>'`, or the dashboard web console). See [index-optimization.md](https://raw.githubusercontent.com/planetscale/database-skills/main/skills/neki/references/index-optimization.md) and [mvcc-vacuum.md](https://raw.githubusercontent.com/planetscale/database-skills/main/skills/neki/references/mvcc-vacuum.md). Per-query statistics for Query Insights come from the always-enabled `pginsights` extension.
+Standard Postgres views (`pg_stat_activity`, `pg_stat_user_tables`, `pg_stat_user_indexes`) work on a given shard (`SET __neki.shard = '<shard_uid>'`, or the dashboard web console). Dead tuples, index usage, and WAL are ordinary Postgres — use the [postgres skill](https://raw.githubusercontent.com/planetscale/database-skills/main/skills/postgres/SKILL.md). Per-query statistics for Query Insights come from the always-enabled `pginsights` extension.

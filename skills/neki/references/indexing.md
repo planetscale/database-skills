@@ -15,7 +15,7 @@ Each shard is Postgres, so ordinary Postgres indexing applies **per shard**. Two
 1. **Lead sharded-table indexes with the shard key**, then equality, range, and sort columns.
 2. Always index foreign key columns (Postgres does not create these automatically).
 3. Index columns used in `WHERE`, `JOIN`, and `ORDER BY`.
-4. Don't over-index — each index slows writes on every shard (see [index-optimization.md](https://raw.githubusercontent.com/planetscale/database-skills/main/skills/neki/references/index-optimization.md)).
+4. Don't over-index — each extra index is written on every shard. Audit usage per shard (`SET __neki.shard`); an index unused on one shard may be used on another. Schema recommendations surface candidates. For the audit queries, use the [postgres skill](https://raw.githubusercontent.com/planetscale/database-skills/main/skills/postgres/SKILL.md).
 5. Build indexes through Online DDL, and do **not** add `CONCURRENTLY` (see [schema-changes.md](https://raw.githubusercontent.com/planetscale/database-skills/main/skills/neki/references/schema-changes.md)).
 
 ```sql

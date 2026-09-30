@@ -8,11 +8,7 @@ tags: neki, sharding, schema-design, shard-key, best-practices, readiness
 
 Docs: https://planetscale.com/docs/neki/best-practices · https://planetscale.com/docs/neki/when-to-shard
 
-Neki runs unsharded or sharded, and you can start unsharded and shard later. Designing for sharding up front makes that transition cheap. This guide covers choosing a shard key and shaping schema and queries so most work stays on one shard. For topology mechanics (shard groups, shard indexes, key ranges), see [sharding-model.md](https://raw.githubusercontent.com/planetscale/database-skills/main/skills/neki/references/sharding-model.md).
-
-## When to shard
-
-Shard when a single primary is the bottleneck after tuning configuration, queries, indexes, and cluster size (and considering Metal with local NVMe). Good signals: write throughput or IOPS limits on the primary, a working set exceeding one instance's RAM, wanting to reduce the blast radius of one primary failure, or a stable routing key that keeps related data together. Evaluate single-shard improvements first with Query Insights and schema recommendations.
+Neki runs unsharded or sharded, and you can start unsharded and shard later. Designing for sharding up front makes that transition cheap. This guide covers choosing a shard key and shaping schema and queries so most work stays on one shard. For when to shard and how to size the cluster, see [scaling-and-capacity.md](https://raw.githubusercontent.com/planetscale/database-skills/main/skills/neki/references/scaling-and-capacity.md). For topology mechanics (shard groups, shard indexes, key ranges), see [sharding-model.md](https://raw.githubusercontent.com/planetscale/database-skills/main/skills/neki/references/sharding-model.md).
 
 ## Choosing a shard key
 

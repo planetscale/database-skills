@@ -35,7 +35,7 @@ A poor shard key concentrates rows or traffic on one shard. Watch per-shard CPU,
 
 ## Resizing and workload isolation
 
-- **Configuration profiles**: change a profile's cluster size (CPU, memory, storage) and replica count; changes roll through the profile's shards asynchronously (follow the Changes tab).
+- **Configuration profiles**: change a profile's cluster size (CPU, memory, storage), replica count, and Postgres parameters. Those parameters apply to every shard on the profile, so a shard that needs different settings gets its own profile. Changes roll through the profile's shards asynchronously (follow the Changes tab).
 - **Router groups**: add router groups for independent router sizing and to isolate connection workloads (see [connections.md](https://raw.githubusercontent.com/planetscale/database-skills/main/skills/neki/references/connections.md)).
 - **Admin**: sized separately; PlanetScale raises its memory automatically when needed.
 - Profile, router, and admin changes are asynchronous — wait for one to finish before submitting a dependent change.
