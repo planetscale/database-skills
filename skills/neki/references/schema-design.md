@@ -71,10 +71,12 @@ The router rejects objects tied to one host's storage or code: tablespaces, colu
 
 Partitioning splits one table inside a single shard. It is not sharding, and a shard index is not a Postgres range partition. `CREATE TABLE ... PARTITION BY` sent through a router creates the same partitions on every managed shard. `pg_partman` is not available; create and drop partitions with DDL. For Postgres partitioning itself, use the [postgres skill](https://raw.githubusercontent.com/planetscale/database-skills/main/skills/postgres/SKILL.md).
 
+Partitions are still useful for time-based data lifecycle management (remove old data by dropping partitions instead of bulk `DELETE` DML), but not for performance (use table sharding instead).
 ## General guidelines
 
 - Tables and columns: singular `snake_case`; indexes `{table}_{column}_idx`.
-- Add `NOT NULL` widely; add `created_at TIMESTAMPTZ DEFAULT NOW()` to tables.
-- Propagate the shard key onto every tenant-scoped table, even when it feels redundant — it keeps joins and transactions shard-local.
+- Use `NOT NULL` widely; add default values where possible to avoid unset fields (`created_at TIMESTAMPTZ DEFAULT NOW()`).
+- Include a shard key predicate in every tenant-scoped query, even when it feels redundant — it keeps joins and transactions shard-local.
 - Declare small shared lookup tables as reference tables rather than sharding them.
+- Use unsharded (single-shard homed) tables where appropriate: tables that don't have to exist on all shards (for shard-local joins), and aren't large or busy enough to benefit from sharding.
 - Apply schema changes through Neki's managed workflows (see [schema-changes.md](https://raw.githubusercontent.com/planetscale/database-skills/main/skills/neki/references/schema-changes.md)).

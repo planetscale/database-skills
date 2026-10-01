@@ -8,11 +8,11 @@ tags: neki, indexes, gsi, reference-tables, composite, sharding
 
 Docs: https://planetscale.com/docs/neki/reference-tables-and-gsis
 
-Each shard is Postgres, so ordinary Postgres indexing applies **per shard**. Two distributed additions matter: lead sharded-table indexes with the shard key, and use **reference tables** or **global secondary indexes (GSIs)** for access paths the shard key can't serve.
+Each shard is Postgres, so ordinary Postgres indexing applies **per shard**. Two distributed additions matter: lead a sharded table index with the shard key if the index needs to be globally unique, and use **reference tables** or **global secondary indexes (GSIs)** for access paths the shard key can't serve.
 
 ## Per-shard index rules
 
-1. **Lead sharded-table indexes with the shard key**, then equality, range, and sort columns.
+1. If a composite index on a sharded table must be unique between shards, **lead the index with the shard key**, then equality, range, and sort columns.
 2. Always index foreign key columns (Postgres does not create these automatically).
 3. Index columns used in `WHERE`, `JOIN`, and `ORDER BY`.
 4. Don't over-index — each extra index is written on every shard. Audit usage per shard (`SET __neki.shard`); an index unused on one shard may be used on another. Schema recommendations surface candidates. For the audit queries, use the [postgres skill](https://raw.githubusercontent.com/planetscale/database-skills/main/skills/postgres/SKILL.md).
@@ -36,7 +36,7 @@ A **reference table** keeps a full copy of shared data on every shard in a group
 } }
 ```
 
-- Neki assumes the copies already exist and match — it does **not** verify them, so populate every copy before binding.
+- Neki assumes the copies already exist and match — it does **not** verify them, so populate every copy before binding or start with an empty table and fill it after binding.
 - A write to a reference table runs on **every** shard holding a copy (one write → N shard executions), and those per-shard commits are independent.
 - Client `COPY TO STDOUT` works for a reference table, including text, CSV, and binary. File `COPY` does not (`NK013` code `43`).
 
@@ -62,7 +62,7 @@ A **GSI** maps another key to the owner row's shard key via a **lookup table**, 
 ```
 - Applications can't query or write the lookup table directly through a router.
 - A **unique** GSI can serve a covering read when the lookup row has every needed column; a **non-unique** GSI may return several shard keys and narrow to those shards (it must also set `owner_pk_columns`).
-- Use GSIs for **highly selective** lookups — if the value appears on most shards, the lookup approaches a scatter and the write cost isn't worth it.
+- Use GSIs for **highly selective** lookups — if the value looked up in the GSI appears on most shards, the query approaches a scatter and the lookup isn't saving much work. The GSI also adds overhead when it's kept in sync with the owner table, so savings from GSI lookups must be worth the overhead.
 - `UPDATE`/`DELETE` routed through a GSI are rejected; updating a GSI column is supported only for a single-row update of one active, globally unique, single-column GSI.
 
 ### Global uniqueness via GSI

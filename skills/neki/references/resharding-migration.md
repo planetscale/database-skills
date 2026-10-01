@@ -15,7 +15,7 @@ Neki moves data online with the **Replicator**: it copies existing rows, then st
 | Workflow | What changes |
 | --- | --- |
 | **MoveTables** | Move selected tables to another database, or to a shard group whose shards are not the source shards |
-| **Reshard** | Redistribute declared tables from one source shard group into a target shard group in the same database (this is how you shard an imported unsharded database) |
+| **Reshard** | Redistribute declared tables from one source shard group into a target shard group in the same database. This is how you shard an imported unsharded database, or increase or decrease the number of shards for sharded tables.
 
 During Platform Preview these are driven by **SQL metafunctions on a router** (no dashboard or CLI workflow). Mutations require the `neki_operator` role; status and report functions require `neki_viewer`. A workflow keeps running after the SQL session that created it disconnects.
 
@@ -61,7 +61,7 @@ A staged switch moves non-primary reads (`replica`/`rdonly`) first, then writes.
 
 ## Completing and source cleanup
 
-`workflow_complete` retires migration resources; source data is retained by default. `{"drop_source_data": true}` truncates tables that kept the same database, schema, and name, and drops old source tables that moved to a different one. For MoveTables you can instead rename an old source table to `_<table>_old`; you cannot both rename and remove. Reshard keeps table identifiers, so it truncates rather than renames. An old source shard can be removed later if it holds no other data and isn't the authoritative group.
+`workflow_complete` retires migration resources; source data is retained by default. `{"drop_source_data": true}` truncates tables that kept the same database, schema, and name, and drops old source tables that moved to a different one. For MoveTables you can instead rename an old source table to `_<table>_old`; you cannot both rename and remove. Reshard keeps table identifiers, so it truncates moved and leaves the tables themselves in place, and it cannot rename old tables. An old source shard can be removed later if it holds no other data and isn't the authoritative group.
 
 ## Importing external Postgres
 

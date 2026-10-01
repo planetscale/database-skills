@@ -8,7 +8,7 @@ tags: neki, connections, router, roles, tls, replica-routing
 
 Docs: https://planetscale.com/docs/neki/connecting · https://planetscale.com/docs/neki/replicas
 
-Applications connect to a **Neki router** (not to individual shards) using the Postgres wire protocol, so standard Postgres clients, drivers, and ORMs work. The router plans each statement and sends it to the required shards. A router is more than a pooler: it has a full Postgres parser, planner, buffering, and health-aware routing.
+Applications connect to a **Neki router** (not to individual shards) using the Postgres wire protocol, so standard Postgres clients, drivers, and ORMs work. The router plans each statement and sends it to the required shards. A router is more than a query relay or a proxy: it has a full Postgres parser, planner, buffering, and health-aware routing.
 
 **All connections use port `5432`.** There is no separate pooler port — pooling happens in the sidecars beside each Postgres instance.
 
@@ -33,7 +33,7 @@ Use additional **router groups** when a workload needs independent router sizing
 
 ## Primary vs replica routing
 
-Reads go to the shard **primary** by default (required for writes and read-after-write). Route reads to replicas with `__neki.target`:
+Queries go to the shard **primary** by default (required for writes and queries needing a read-after-write guarantee). Route reads to replicas with `__neki.target`:
 
 ```sql
 SET __neki.target = 'replica';        -- before a transaction

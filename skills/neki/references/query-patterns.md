@@ -13,9 +13,9 @@ Standard Postgres query hygiene applies per shard, plus the key sharded rule: **
 ## Route to a single shard
 
 ```sql
--- single-shard (shard key present)
+-- single-shard (tenant_id shard key present)
 SELECT id, status FROM orders WHERE tenant_id = $1 AND status = 'pending';
--- scatter (no shard key) — every shard in the group
+-- scatter (no shard key) — query will touch every shard in the group
 SELECT id, status FROM orders WHERE status = 'pending';
 ```
 
@@ -58,7 +58,7 @@ cur.execute("SELECT id, name FROM users WHERE tenant_id=%s AND id = ANY(%s)", (t
 
 - **UNION → UNION ALL** when duplicates are impossible or acceptable. `UNION` is supported; `INTERSECT` and `EXCEPT` are rejected for planned application queries during Platform Preview.
 - **IN subquery → EXISTS** to short-circuit.
-- **OFFSET → keyset (cursor) pagination** — `OFFSET` scans and discards rows and is worse when merged across shards:
+- **OFFSET → keyset pagination** — `OFFSET` scans and discards rows, performance degrades as `OFFSET` value grows, and is worse when merged across shards. Paginate by using key lookups: 
 
 ```sql
 SELECT id, title FROM articles

@@ -37,10 +37,17 @@ CREATE TABLE events (
   tenant_id BIGINT NOT NULL
 );
 
--- child table: shard key leads, identity column secondary
+-- child table with low to moderate write traffic: shard key leads, identity column secondary
 CREATE TABLE order_items (
   tenant_id BIGINT NOT NULL,
   id BIGINT GENERATED ALWAYS AS IDENTITY,
+  PRIMARY KEY (tenant_id, id)
+);
+
+-- child table with high write traffic: shard key leads, UUID column secondary, avoids a hot sequence
+CREATE TABLE order_items (
+  tenant_id BIGINT NOT NULL,
+  id UUID DEFAULT uuidv7(),
   PRIMARY KEY (tenant_id, id)
 );
 ```

@@ -27,7 +27,7 @@ Managed DDL records the requested DDL, tracks per-shard progress, waits until ev
 - **Online DDL** — for disruptive changes (row rewrites, indexing a large table). Neki builds a **shadow table**, applies the DDL to it, copies existing rows in batches, and streams ongoing changes until caught up. **Cutover** is short: routers buffer queries for the table, Neki locks it, applies final changes, and swaps original and shadow in one transaction. If it can't get the lock within the cutover timeout it backs off and retries. Do **not** use `CONCURRENTLY` when creating an index via Online DDL.
 - **Direct DDL** — sends the change to Postgres in a transaction; the only managed path for statements a shadow-table copy can't carry (`CREATE`/`DROP TABLE`, types, sequences, views). Gets the same tracking, readiness, and completion as Online DDL.
 
-Neki picks the path automatically; force direct by passing `'{"applyDirect": true}'` as the fifth argument to `online_ddl_create`. Each workflow must resolve to **one** table and one execution category — split changes that touch multiple tables or mix online and direct work.
+Neki picks the path automatically; force direct by passing `'{"applyDirect": true}'` as the fifth argument to `online_ddl_create`. Each workflow must resolve to **one** table and one execution category. Changes that touch multiple tables or mix "online" and "direct" execution paths must be split into multiple workflows.
 
 ### Workflow lifecycle (SQL metafunctions)
 
@@ -50,7 +50,7 @@ SELECT __neki.online_ddl_cleanup('add-refund-state');
 SELECT __neki.workflow_cancel('add-refund-state');
 ```
 
-Completion is coordinated but **not** one atomic transaction across the database (shards usually finish within seconds of each other). Repeated completion requests are safe. If one shard fails, recover **forward**: `online_ddl_cleanup` the failed attempt, reissue `online_ddl_create` with the stored configuration, then complete so every shard converges. Cancellation is rejected while a shard is mid-cutover; if some shards completed and others cancelled, Neki keeps the workflow — reissue create and complete rather than cleaning up blindly.
+Completion is coordinated but **not** one atomic transaction across the database (shards usually finish within seconds of each other). Repeated completion requests are safe. The workflow reports `completed` when every shard is done. If a shard fails, recover **forward**: `online_ddl_cleanup` the failed attempt, reissue `online_ddl_create` with the stored configuration, then complete so every shard converges. Cancellation is rejected while a shard is mid-cutover; if some shards completed and others cancelled, Neki keeps the workflow — reissue create and complete rather than cleaning up blindly.
 
 ## Choosing a path
 

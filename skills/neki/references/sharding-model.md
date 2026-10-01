@@ -53,6 +53,7 @@ Prefer `xxhash` unless you have a specific reason not to: it distributes rows ev
 
 Changing a group's shard-index type without changing its key ranges can concentrate rows on one shard or leave values with no destination.
 
+Key ranges are declared by setting the `start` and `end` hash boundaries. Ranges don't have to be of equal size, but they typically are unless you want to intentionally change the proportion of data and workload the shards receive. Equally sized ranges are the standard choice that fits most use cases. When dealing with workload or data skew, evaluate shard key choices first to make sure the shard key itself produces equal distribution.
 ## Shard-group resolution and defaults
 
 A table's group resolves in order: the table's `shard_group` → the schema's `default_shard_group` → the database's `default_shard_group` → the topology's `default_shard_group`. Unlisted tables inherit the effective default; if nothing resolves, the table is not routable.
@@ -97,7 +98,7 @@ For access that the shard key can't satisfy, a **reference table** keeps a full 
 
 ## Editing the topology
 
-An update is a full replacement, not a patch. View or replace it in the dashboard (Clusters → Data topology), the CLI (`pscale branch data-topology get|ls|update`), or SQL:
+An update is a full replacement, not a patch. For resharding, use a reshard workload instead of replacing the entire topology with`set_data_topology`. View or replace it in the dashboard (Clusters → Data topology), the CLI (`pscale branch data-topology get|ls|update`), or SQL:
 
 ```sql
 SELECT * FROM __neki.set_data_topology($topology$ { ... } $topology$, true,

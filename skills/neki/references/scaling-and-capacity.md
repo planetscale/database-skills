@@ -8,7 +8,7 @@ tags: neki, scaling, capacity, hot-shards, shard-groups, cluster-sizing
 
 Docs: https://planetscale.com/docs/neki/when-to-shard · https://planetscale.com/docs/neki/best-practices · https://planetscale.com/docs/neki/cluster-configuration/cluster-sizing
 
-Neki scales in two ways: **scale up** a shard (larger cluster size, more replicas) and **shard horizontally** (spread a logical table across many shards, each with its own primary and replicas). You can start unsharded and shard later.
+Neki scales in two ways: **scale up** a shard (larger cluster size, more replicas) and **shard horizontally** (spread a logical table across many shards, each with its own primary and replicas). You can start unsharded and shard later. Routers can also scale vertically (increase hardware size) and horizontally (add new routers, add replicas to existing routers).
 
 ## When to shard
 
@@ -27,7 +27,7 @@ Evaluate single-shard improvements first with Query Insights and schema recommen
 - Creating a shard adds capacity only; rows move there only after a topology change plus a data-migration workflow.
 - Shards don't need to be evenly sized or identically configured — assign resources, replicas, parameters, and extensions per the data they hold, using separate configuration profiles.
 - Use **shard groups** to place different tables or workloads (hot, cold, isolated) on the hardware they need.
-- A two-way split of existing data uses **three** shards: the original stays as the authoritative single-shard group, and two new shards hold the split data.
+- Resharding redistributes table rows onto a set of target shards that must not include the source shards. For example, a two-way split of an unsharded table needs **three** shards: the original source shard and two new shards to hold the split data. The original shard can be removed later if it's not the authoritative shard. The authoritative shard can't be removed.
 
 ## Hot shards and data skew
 

@@ -37,7 +37,7 @@ Add `NEKI_PG_PLAN` to include each shard's Postgres plan inside the routes. A pl
 
 ## Controlling fanout
 
-`__neki.fanout` rejects `SELECT` and DML whose routing shape exceeds the level (default `scatter`):
+`__neki.fanout` rejects `SELECT` and DML whose routing shape exceeds the level (default `scatter`, doesn't reject anything):
 
 ```sql
 SET __neki.fanout = 'single';   -- or 'multi' or 'scatter'

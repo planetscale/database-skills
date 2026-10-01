@@ -47,6 +47,7 @@ Set before a transaction (see [query-serving.md](https://raw.githubusercontent.c
 ## Router metafunctions (`__neki.*`)
 
 - **Topology**: `set_data_topology(json, overwrite, options)`, `wait_for_data_topology(revision)`, `list_shards()`.
+- **Client activity**: `stat_get_activity`.
 - **Schema changes**: `online_ddl_create(workflow, database, ddl, migration_id[, options])`, `online_ddl_status`, `workflow_complete`, `workflow_cancel`, `online_ddl_cleanup`, `wait_for_ddl(schema_version, cluster_version)` (see [schema-changes.md](https://raw.githubusercontent.com/planetscale/database-skills/main/skills/neki/references/schema-changes.md)).
 - **Data movement**: `reshard_create`, `move_tables_create`, `workflow_start`, `workflow_stop`, `workflow_status`, `list_workflows`, `workflow_set_options`, `differ_create`, `differ_status`, `differ_report`, `differ_delete`, `workflow_switch_reads`, `workflow_switch_writes`, `workflow_switch_traffic`, `workflow_complete`, `workflow_cancel` (see [resharding-migration.md](https://raw.githubusercontent.com/planetscale/database-skills/main/skills/neki/references/resharding-migration.md)). Mutations require `neki_operator`; status and report functions require `neki_viewer`.
 - **Discovery**: `SELECT name, arguments, purpose FROM __neki.list_metafuncs();` lists what your router exposes.

@@ -40,7 +40,7 @@ Session advisory locks can't be held on multiple shards from one session (error 
 
 ## Design guidance
 
-- Model each business transaction to a single shard-key value; propagate the shard key onto every table it writes (see [sharding-readiness.md](https://raw.githubusercontent.com/planetscale/database-skills/main/skills/neki/references/sharding-readiness.md)).
+- Model each business transaction to a single shard-key value. Include the shard key predicate in every query it runs against a sharded table (see [sharding-readiness.md](https://raw.githubusercontent.com/planetscale/database-skills/main/skills/neki/references/sharding-readiness.md)).
 - Verify the plan with `EXPLAIN (NEKI_PLAN)` before relying on multi-statement behavior; use `__neki.tx_mode = 'single'` and `__neki.fanout = 'single'` in development and CI.
 - For unavoidable cross-shard workflows, use application-level patterns (idempotent operations, sagas, outbox) rather than expecting distributed atomicity.
 - Isolation is local to each shard; don't expect a global serializable snapshot.

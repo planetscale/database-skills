@@ -28,7 +28,7 @@ A **router** accepts Postgres connections (port `5432`) and decides which shard(
 
 A **shard** is one Postgres primary plus its replicas, and is its own failure domain (independent switchover and failover). Each Postgres instance runs two Neki components:
 
-- **Sidecar** — the per-instance endpoint for router queries and admin operations; handles connection pooling and streams serving status to routers. All router-to-Postgres traffic goes through the sidecar.
+- **Sidecar** — the per-instance endpoint for router queries and admin operations; handles connection pooling and streams serving status to routers. All router-to-Postgres traffic goes through the sidecar. The sidecar runs alongside the Postgres process on each instance, so there's no additional network hop between the sidecar and the database process.
 - **PostgresManager** — manages startup, teardown, and the data directory of its Postgres instance.
 
 ## Control plane
@@ -40,13 +40,13 @@ A **shard** is one Postgres primary plus its replicas, and is its own failure do
 
 ## High availability
 
-Each shard's primary replicates to its replicas via Postgres physical replication; on primary failure the admin promotes an eligible replica and updates topology. Because routers are stateless and redundant across availability zones, a router failure just drops its connections (clients reconnect to another router). A new shard's durability policy defaults to `sync` (the primary waits for one replica before confirming a commit). If a shard reports low disk, the router treats it as read-only until it is resized. See [replication.md](https://raw.githubusercontent.com/planetscale/database-skills/main/skills/neki/references/replication.md).
+Each shard's primary replicates to its replicas via Postgres physical replication; on primary failure the admin promotes an eligible replica and updates topology. Because routers are stateless and redundant across availability zones, a router failure just drops its connections (clients reconnect to another router). Neki uses a synchronous durability mode (`sync`) between the primary and replicas of each shard: the primary waits for one replica to receive the write before confirming a commit. If a shard reports low free disk space, the router treats it as read-only until it is resized. See [replication.md](https://raw.githubusercontent.com/planetscale/database-skills/main/skills/neki/references/replication.md).
 
 ## Query lifecycle
 
 1. Client sends a Postgres query to a router.
-2. The router parses it and consults the data topology and schema.
-3. It builds a plan: single-shard when a shard-key predicate is present, otherwise multi-shard or scatter (see [query-serving.md](https://raw.githubusercontent.com/planetscale/database-skills/main/skills/neki/references/query-serving.md)).
+2. The router parses it and consults the data topology and schema. Certain statements can be handled by the router itself, including some metadata queries and queries that don't need shard participation (think `select now();`).
+3. For a query that needs to touch shards, the router builds a plan: single-shard when a shard-key predicate is present, otherwise multi-shard or scatter (see [query-serving.md](https://raw.githubusercontent.com/planetscale/database-skills/main/skills/neki/references/query-serving.md)).
 4. Work is sent to sidecars in parallel; each shard's Postgres executes locally.
 5. The router combines results (aggregate, sort, limit) and returns one Postgres result.
 
