@@ -1,107 +1,36 @@
 ---
-name: pre-sharding-postgres
-description: Guide schema design, query patterns, and data modeling decisions so a PostgreSQL database can be sharded in the future with minimal rework.
-tags: postgres, sharding, schema-design, query-patterns, data-modeling
+title: Neki Sharding Readiness and Best Practices
+description: Schema and query design that keeps a Postgres database shard-ready on Neki
+tags: neki, sharding, schema-design, shard-key, best-practices, readiness
 ---
 
-# Pre-Sharding PostgreSQL Best Practices
+# Sharding Readiness and Best Practices
 
-This guide helps prepare a Postgres schema for future horizontal sharding with minimal rework.
+Docs: https://planetscale.com/docs/neki/best-practices · https://planetscale.com/docs/neki/when-to-shard
 
-## Shard Key Design
+Neki runs unsharded or sharded, and you can start unsharded and shard later. Designing for sharding up front makes that transition cheap. This guide covers choosing a shard key and shaping schema and queries so most work stays on one shard. For when to shard and how to size the cluster, see [scaling-and-capacity.md](https://raw.githubusercontent.com/planetscale/database-skills/main/skills/neki/references/scaling-and-capacity.md). For topology mechanics (shard groups, shard indexes, key ranges), see [sharding-model.md](https://raw.githubusercontent.com/planetscale/database-skills/main/skills/neki/references/sharding-model.md).
 
-Choose a **shard key** now, even if you're not sharding yet. It should be present on every tenant/user-scoped table, included in every frequent query's WHERE clause, high cardinality, and evenly distributed. Prefer an immutable key — changing it later requires data migration. Common choices: `tenant_id`, `org_id`, `user_id`, `account_id`.
+## Choosing a shard key
 
-Use real workload data to choose: favor a key that keeps your hottest queries single-shard.
+Pick a shard key from the queries and transactions you rely on. Prefer a key that:
 
-**IDs:** UUIDs (or UUIDv7) work well for globally unique IDs without coordination; per-shard sequences are fine for the secondary column in composite primary keys.
+- Distributes data and writes evenly (avoids hot shards).
+- Appears in the predicates of latency-sensitive queries (so they route to one shard).
+- Keeps rows that are joined or updated together in the same shard group.
+- Stays stable for a row's lifetime (changing it relocates the row — a resharding operation).
 
-## Primary Keys
+A tenant key (`tenant_id`, `org_id`, `account_id`, `customer_id`) commonly keeps a tenant's rows together. Which types a shard index accepts is in [sharding-model.md](https://raw.githubusercontent.com/planetscale/database-skills/main/skills/neki/references/sharding-model.md).
 
-A single-column PK is fine when it functions as the natural shard key (e.g., `user_id` on a `users` table). For other tables, use a composite PK with the shard key leading so lookups stay shard-local. Avoid globally-coordinated sequences across shards.
+Keys, uniqueness, and foreign keys are in [schema-design.md](https://raw.githubusercontent.com/planetscale/database-skills/main/skills/neki/references/schema-design.md). Globally unique IDs are in [id-generation.md](https://raw.githubusercontent.com/planetscale/database-skills/main/skills/neki/references/id-generation.md). Reference tables and GSIs are in [indexing.md](https://raw.githubusercontent.com/planetscale/database-skills/main/skills/neki/references/indexing.md). Single-shard transactions are in [transactions.md](https://raw.githubusercontent.com/planetscale/database-skills/main/skills/neki/references/transactions.md).
 
-```sql
--- good: single-column PK that is the shard key
-CREATE TABLE users (user_id BIGINT PRIMARY KEY, ...);
+## Readiness checklist
 
--- good: composite PK with shard key leading on a child table
-CREATE TABLE orders (
-  user_id BIGINT NOT NULL,
-  id BIGINT GENERATED ALWAYS AS IDENTITY,
-  PRIMARY KEY (user_id, id)
-);
-
--- incorrect: shard key not leading in composite PK
-PRIMARY KEY (id, user_id)
-```
-
-## Co-located Data
-
-Tables frequently joined must share the same shard key so joins stay shard-local. Always include the shard key in join conditions. Use consistent column types for the shard key across co-located tables (e.g., don't mix `int` and `bigint` for the same logical key).
-
-```sql
--- correct: shard-local join
-SELECT o.id, oi.product_id FROM orders o
-JOIN order_items oi ON oi.tenant_id = o.tenant_id AND oi.order_id = o.id
-WHERE o.tenant_id = $1;
-```
-
-## Reference Tables
-
-Small, rarely-changing lookup tables (countries, currencies, feature flags) don't need a shard key — they get replicated across shards. Characteristics: typically small (e.g., well under 100K rows), rarely written, no tenant scoping, broadly joined.
-
-## Query Patterns
-
-Every query on sharded tables must include the shard key. Without it, the query becomes a scatter-gather across all shards.
-
-```sql
--- correct: routed to single shard
-SELECT * FROM orders WHERE tenant_id = $1 AND status = 'pending';
-
--- incorrect: hits all shards
-SELECT * FROM orders WHERE status = 'pending';
-```
-
-For lookups by a non-shard column, maintain a mapping table. Ensure mapping consistency with backfill/repair jobs and miss-rate monitoring.
-
-## Indexes
-
-Lead indexes with the shard key. Scope unique constraints to include it.
-
-```sql
--- correct
-CREATE INDEX idx_orders_tenant_status ON orders (tenant_id, status, created_at);
-ALTER TABLE orders ADD CONSTRAINT uq_order_number UNIQUE (tenant_id, order_number);
-
--- incorrect: index or unique constraint without shard key
-CREATE INDEX idx_orders_status ON orders (status, created_at);
-ALTER TABLE orders ADD CONSTRAINT uq_order_number UNIQUE (order_number);
-```
-
-## Foreign Keys
-
-Cross-shard FKs are challenging to support in sharded systems. FKs within the same shard key (co-located data) may be supported depending on the sharding implementation. Cross-shard-key FKs must move to application-level enforcement before sharding. Some systems require all FKs to be disabled before sharding.
-
-## Transactions
-
-Keep transactions within a single shard key value. Cross-shard transactions typically require 2PC or similar distributed coordination and are significantly slower.
-
-## Aggregations
-
-Global aggregations (`COUNT(*)`, `SUM()` across all shards) become expensive. Scope aggregations to the shard key, or maintain pre-computed rollup tables for global stats.
-
-## Denormalization
-
-Propagate the shard key onto every related table, even if it feels redundant. A "redundant" `tenant_id` column avoids cross-shard joins.
-
-## Shard-Readiness Checklist
-
-1. Shard key identified and present on every tenant-scoped/sharded table (reference tables excluded)
-2. Composite PKs with shard key leading; shard-safe IDs (no global coordination)
-3. Shard key in all queries, indexes (leading position), and join conditions
-4. Unique constraints scoped to include shard key
-5. Cross-shard FKs audited; plan for app-level enforcement (or FK removal if required)
-6. Transactions scoped to single shard key value
-7. Global aggregations identified; rollup/async plan in place
-8. Migrations avoid long locks; Use online / revertible patterns
-9. Lookup/mapping paths hardened with backfill and monitoring
+1. Shard key chosen from real query and transaction predicates; present on every tenant-scoped table.
+2. Composite primary keys lead with the shard key; globally unique IDs use `uuidv7()` or application-generated IDs.
+3. Shard key in hot query `WHERE` clauses, indexes (leading), and join conditions.
+4. Unique constraints scoped to include the shard key.
+5. FK-related tables co-located in the same shard group; cross-shard references planned for application-level enforcement.
+6. Reference tables and GSIs identified for non-shard-key access paths.
+7. Transactions scoped to one shard-key value.
+8. Global aggregations identified; rollup or async plan in place.
+9. Authoritative shard group left as a standalone shard, sized for catalog work, sequences, and unsharded tables.
